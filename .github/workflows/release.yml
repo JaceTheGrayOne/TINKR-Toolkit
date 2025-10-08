@@ -5,10 +5,14 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Create Release
     runs-on: windows-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,10 +26,23 @@ jobs:
         run: |
           go build -ldflags="-s -w" -o TINKR-Toolkit.exe
 
+      - name: Verify executable exists
+        run: |
+          dir
+          if not exist "TINKR-Toolkit.exe" exit 1
+
+      - name: Delete existing release if present
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: ${{ github.ref_name }}
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: tinkr.exe
+          files: TINKR-Toolkit.exe
           draft: false
           prerelease: false
         env:

@@ -39,14 +39,6 @@ jobs:
           Copy-Item "retoc" -Recurse -Destination "release/retoc"
           Compress-Archive -Path "release/*" -DestinationPath "TINKR-Toolkit.zip"
 
-      - name: Delete existing release if present
-        uses: dev-drprasad/delete-tag-and-release@v1.1
-        with:
-          tag_name: ${{ github.ref_name }}
-          delete_releases: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:

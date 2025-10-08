@@ -1,14 +1,11 @@
 # TINK.R Toolkit
-
 A software multi-tool designed to streamline the use of various tools required for video game modding and data mining.
 
 ## Currently Supported Tools
-
 - **Retoc** - Zen asset packer/unpacker
 
 
 ## Features
-
 - **Automatic Mod Discovery** - Scans your mods directory and lists all available mods
 - **Parallel Building** - Build multiple mods simultaneously
 - **Quick Hotkeys** - Press 0-9 to instantly build specific mods
@@ -17,7 +14,6 @@ A software multi-tool designed to streamline the use of various tools required f
 
 
 ### Quick Start
-
 1. **Download the latest release** from [Releases](https://github.com/JaceTheGrayOne/TINKR-Toolkit/releases)
 2. **Extract** `TINKR-Toolkit.exe` and the `retoc/` folder to your desired location
 3. **Run** `TINKR-Toolkit.exe`
@@ -28,3 +24,8 @@ A software multi-tool designed to streamline the use of various tools required f
 git clone https://github.com/jacethegrayone/tinkr-toolkit.git
 cd tinkr-toolkit
 go build -o tinkr-toolkit.exe
+
+## Credits
+TINK.R Toolkit includes and relies on **[retoc](https://github.com/trumank/retoc)**, an Unreal Engine asset packer/unpacker created by [trumank](https://github.com/trumank).
+
+retoc is distributed under the [MIT License](https://github.com/trumank/retoc/blob/main/LICENSE).

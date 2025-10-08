@@ -1,0 +1,10 @@
+TINK.R Toolkit uses the following third-party software:
+
+----------------------------------------
+retoc
+Author: Truman K.
+URL: https://github.com/trumank/retoc
+License: MIT
+----------------------------------------
+
+retoc is included as-is and remains the property of its original author.

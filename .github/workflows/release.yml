@@ -5,9 +5,6 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
-
 jobs:
   release:
     name: Create Release
@@ -27,25 +24,33 @@ jobs:
           go build -ldflags="-s -w" -o TINKR-Toolkit.exe
 
       - name: Verify executable exists
-        shell: pwsh
         run: |
-          if (-not (Test-Path "TINKR-Toolkit.exe")) {
-            Write-Host "Executable not found!"
+          if (!(Test-Path "TINKR-Toolkit.exe")) {
+            Write-Error "Build failed: Executable not found!"
             exit 1
+          } else {
+            Write-Output "Executable found successfully."
           }
-          Write-Host "Executable found successfully."
+
+      - name: Package release files
+        run: |
+          mkdir release
+          Copy-Item "TINKR-Toolkit.exe" release/
+          Copy-Item "retoc" -Recurse -Destination "release/retoc"
+          Compress-Archive -Path "release/*" -DestinationPath "TINKR-Toolkit.zip"
 
       - name: Delete existing release if present
         uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           tag_name: ${{ github.ref_name }}
-          delete_release: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_releases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: TINKR-Toolkit.exe
+          files: TINKR-Toolkit.zip
           draft: false
           prerelease: false
         env:

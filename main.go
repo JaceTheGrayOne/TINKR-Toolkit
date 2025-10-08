@@ -20,24 +20,24 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Config holds all application configuration
+// Config
 type Config struct {
 	RetocDir string `json:"retoc_dir"`
 	PakDir   string `json:"pak_dir"`
 	ModsDir  string `json:"mods_dir"`
 }
 
-// Global config
+// Global Config
 var cfg Config
 
 // Styles
 var (
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("240")) // Gray
+			Foreground(lipgloss.Color("240"))
 
 	selectedStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("117")). // Light blue (PowerShell blue)
+			Foreground(lipgloss.Color("117")).
 			Bold(true)
 
 	normalStyle = lipgloss.NewStyle().
@@ -59,7 +59,7 @@ var (
 			Foreground(lipgloss.Color("241"))
 
 	checkboxStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("117")) // Light blue checkbox
+			Foreground(lipgloss.Color("117"))
 )
 
 type Mod struct {
@@ -143,16 +143,11 @@ func loadOrCreateConfig() (Config, error) {
 
 	retocDir := filepath.Join(exeDir, "retoc")
 
-	fmt.Println(titleStyle.Render("First Time Setup"))
+	fmt.Println(titleStyle.Render("Setup"))
 	fmt.Println()
-	fmt.Println("Let's configure PakBuilder. Press Enter after each path.")
-	fmt.Println(infoStyle.Render("(Paths with spaces don't need quotes)"))
-	fmt.Println()
-
 	fmt.Println("Modified UAsset/UEXP Directory:")
 	fmt.Println(infoStyle.Render("  Directory of your modified game files"))
 	fmt.Println(infoStyle.Render("  Example: G:\\Grounded\\Modding\\Grounded2\\Mods"))
-	fmt.Println(infoStyle.Render("  Supports: quotes, ~, ./, ../, environment variables"))
 	fmt.Print("> ")
 
 	reader := bufio.NewReader(os.Stdin)
@@ -163,15 +158,13 @@ func loadOrCreateConfig() (Config, error) {
 
 	modsDir, err := normalizePath(modsInput)
 	if err != nil {
-		return Config{}, fmt.Errorf("invalid mods directory: %w", err)
+		return Config{}, fmt.Errorf("Directory is invalid: %w", err)
 	}
 
 	fmt.Println()
 
 	fmt.Println("UE Game \"Paks\" Directory:")
-	fmt.Println(infoStyle.Render("  Directory of the \"Paks\" folder for the game"))
 	fmt.Println(infoStyle.Render("  Example: E:\\SteamLibrary\\steamapps\\common\\Grounded2\\Augusta\\Content\\Paks"))
-	fmt.Println(infoStyle.Render("  Supports: quotes, ~, ./, ../, environment variables"))
 	fmt.Print("> ")
 
 	pakInput, err := reader.ReadString('\n')
@@ -181,11 +174,11 @@ func loadOrCreateConfig() (Config, error) {
 
 	pakDir, err := normalizePath(pakInput)
 	if err != nil {
-		return Config{}, fmt.Errorf("invalid pak directory: %w", err)
+		return Config{}, fmt.Errorf("Directory is invalid: %w", err)
 	}
 
 	fmt.Println()
-	fmt.Println(successStyle.Render("✓ Paths normalized:"))
+	fmt.Println(successStyle.Render("Directory path normalized:"))
 	fmt.Println(infoStyle.Render(fmt.Sprintf("  Mods: %s", modsDir)))
 	fmt.Println(infoStyle.Render(fmt.Sprintf("  Paks: %s", pakDir)))
 	fmt.Println()
@@ -206,14 +199,14 @@ func loadOrCreateConfig() (Config, error) {
 	}
 
 	fmt.Println()
-	fmt.Println(successStyle.Render("✓ Configuration saved to config.json"))
+	fmt.Println(successStyle.Render("Config built."))
 	fmt.Println()
 
 	if _, err := os.Stat(cfg.ModsDir); err != nil {
-		return cfg, fmt.Errorf("mods directory not found: %s", cfg.ModsDir)
+		return cfg, fmt.Errorf("Directory not found: %s", cfg.ModsDir)
 	}
 
-	fmt.Println(successStyle.Render("✓ Configuration validated"))
+	fmt.Println(successStyle.Render("Config validated"))
 	fmt.Println()
 	time.Sleep(1 * time.Second)
 
@@ -268,7 +261,7 @@ func discoverMods() ([]Mod, error) {
 	}
 
 	if len(mods) == 0 {
-		return nil, errors.New("no mods found")
+		return nil, errors.New("No mods found")
 	}
 
 	return mods, nil
@@ -301,15 +294,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case "ctrl+c":
 			return m, tea.Quit
 
-		case "up", "k":
+		case "up":
 			if m.cursor > 0 {
 				m.cursor--
 			}
 
-		case "down", "j":
+		case "down":
 			if m.cursor < len(m.mods) {
 				m.cursor++
 			}
@@ -361,7 +354,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.parallelMode = false
 				return m, m.buildAllAsync()
 			} else if len(m.selected) > 1 {
-				m.currentTask = fmt.Sprintf("%d Selected Mods", len(m.selected))
+				m.currentTask = fmt.Sprintf("%d Mods Selected", len(m.selected))
 				m.parallelMode = true
 				return m, m.buildSelectedParallelAsync()
 			} else if len(m.selected) == 1 {
@@ -431,19 +424,15 @@ func (m model) menuView() string {
 
 		if m.cursor == i+1 {
 			cursor = ">"
-			// Selected line - everything is light blue
 			if m.selected[i] {
 				s += selectedStyle.Render(fmt.Sprintf("%s [%s] - %d. %s", cursor, checkbox, hotkey, modName)) + "\n"
 			} else {
 				s += selectedStyle.Render(fmt.Sprintf("%s [%s] - %d. %s", cursor, checkbox, hotkey, modName)) + "\n"
 			}
 		} else {
-			// Normal line
 			if m.selected[i] {
-				// Checkbox is checked - make it light blue, rest is normal
 				s += normalStyle.Render(fmt.Sprintf("%s [", cursor)) + checkboxStyle.Render(checkbox) + normalStyle.Render(fmt.Sprintf("] - %d. %s", hotkey, modName)) + "\n"
 			} else {
-				// Everything normal
 				s += normalStyle.Render(fmt.Sprintf("%s [%s] - %d. %s", cursor, checkbox, hotkey, modName)) + "\n"
 			}
 		}
@@ -474,7 +463,7 @@ func (m model) menuView() string {
 		s += "\n"
 	}
 
-	s += "\nSpace to select • Enter to build • 0-9 hotkeys"
+	s += "\nSpace to select • Enter to build • Hotkeys: 0-9 "
 
 	return s
 }
@@ -486,8 +475,7 @@ func (m model) buildingView() string {
 	s += fmt.Sprintf("Elapsed: %s\n\n", elapsed)
 
 	if m.parallelMode {
-		s += infoStyle.Render("Building mods in parallel...") + "\n"
-		s += infoStyle.Render("This may take a moment depending on mod count.") + "\n"
+		s += infoStyle.Render("Building mods...") + "\n"
 	} else {
 		if m.log != "" {
 			lines := strings.Split(m.log, "\n")
@@ -654,7 +642,7 @@ func buildMod(ctx context.Context, log *strings.Builder, mod Mod) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if ctx.Err() == context.Canceled {
-			return errors.New("build cancelled")
+			return errors.New("Build cancelled")
 		}
 		fmt.Fprintf(log, "  retoc error: %s\n", strings.TrimSpace(string(output)))
 		return fmt.Errorf("retoc failed: %w", err)
@@ -671,7 +659,7 @@ func buildMod(ctx context.Context, log *strings.Builder, mod Mod) error {
 	}
 
 	if len(matches) == 0 {
-		return fmt.Errorf("no output files found")
+		return fmt.Errorf("No output files found")
 	}
 
 	fmt.Fprintf(log, "  Found %d file(s) to copy\n", len(matches))

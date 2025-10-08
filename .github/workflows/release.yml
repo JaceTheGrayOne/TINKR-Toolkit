@@ -20,7 +20,7 @@ jobs:
 
       - name: Build
         run: |
-          go build -ldflags="-s -w" -o tinkr.exe
+          go build -ldflags="-s -w" -o TINKR-Toolkit.exe
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

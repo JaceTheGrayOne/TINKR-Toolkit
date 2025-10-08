@@ -158,7 +158,7 @@ func loadOrCreateConfig() (Config, error) {
 
 	modsDir, err := normalizePath(modsInput)
 	if err != nil {
-		return Config{}, fmt.Errorf("Directory is invalid: %w", err)
+		return Config{}, fmt.Errorf("directory is invalid: %w", err)
 	}
 
 	fmt.Println()
@@ -174,7 +174,7 @@ func loadOrCreateConfig() (Config, error) {
 
 	pakDir, err := normalizePath(pakInput)
 	if err != nil {
-		return Config{}, fmt.Errorf("Directory is invalid: %w", err)
+		return Config{}, fmt.Errorf("directory is invalid: %w", err)
 	}
 
 	fmt.Println()
@@ -203,7 +203,7 @@ func loadOrCreateConfig() (Config, error) {
 	fmt.Println()
 
 	if _, err := os.Stat(cfg.ModsDir); err != nil {
-		return cfg, fmt.Errorf("Directory not found: %s", cfg.ModsDir)
+		return cfg, fmt.Errorf("directory not found: %s", cfg.ModsDir)
 	}
 
 	fmt.Println(successStyle.Render("Config validated"))
@@ -261,7 +261,7 @@ func discoverMods() ([]Mod, error) {
 	}
 
 	if len(mods) == 0 {
-		return nil, errors.New("No mods found")
+		return nil, errors.New("no mods found")
 	}
 
 	return mods, nil
@@ -642,7 +642,7 @@ func buildMod(ctx context.Context, log *strings.Builder, mod Mod) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if ctx.Err() == context.Canceled {
-			return errors.New("Build cancelled")
+			return errors.New("build cancelled")
 		}
 		fmt.Fprintf(log, "  retoc error: %s\n", strings.TrimSpace(string(output)))
 		return fmt.Errorf("retoc failed: %w", err)
@@ -659,7 +659,7 @@ func buildMod(ctx context.Context, log *strings.Builder, mod Mod) error {
 	}
 
 	if len(matches) == 0 {
-		return fmt.Errorf("No output files found")
+		return fmt.Errorf("no output files found")
 	}
 
 	fmt.Fprintf(log, "  Found %d file(s) to copy\n", len(matches))

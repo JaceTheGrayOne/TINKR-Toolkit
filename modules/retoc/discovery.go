@@ -10,7 +10,7 @@ import (
 	"github.com/JaceTheGrayOne/TINKR-Toolkit/modules/utils"
 )
 
-// DiscoverMods scans the configured mods directory and returns all valid mod folders
+// Scans the configured mods directory and returns all valid mod folders
 func DiscoverMods() ([]Mod, error) {
 	entries, err := os.ReadDir(config.Current.ModsDir)
 	if err != nil {

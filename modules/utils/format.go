@@ -2,8 +2,7 @@ package utils
 
 import "strings"
 
-// FormatDisplayName converts a mod folder name into a human-readable display name.
-// Removes z_ prefix, strips numeric codes like _0001_P, and replaces underscores with spaces.
+// Normalize directory name
 func FormatDisplayName(folderName string) string {
 	name := strings.TrimPrefix(folderName, "z_")
 	name = strings.TrimPrefix(name, "Z_")

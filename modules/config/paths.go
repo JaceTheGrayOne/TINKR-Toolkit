@@ -7,8 +7,7 @@ import (
 	"strings"
 )
 
-// NormalizePath cleans and normalizes a user-provided path.
-// Handles quotes, whitespace, environment variables, and ~ expansion.
+// Normalize user-provided paths
 func NormalizePath(path string) (string, error) {
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, "\"")
@@ -34,7 +33,7 @@ func NormalizePath(path string) (string, error) {
 	return cleanPath, nil
 }
 
-// GetExecutableDir returns the directory containing the running executable.
+// Returns the directory containing the executable
 func GetExecutableDir() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {

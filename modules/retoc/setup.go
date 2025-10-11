@@ -16,7 +16,6 @@ type setupStep int
 const (
 	stepModsDir setupStep = iota
 	stepPakDir
-	stepDiscovering
 	stepComplete
 )
 
@@ -26,8 +25,9 @@ type PackSetupModel struct {
 	modsDir   string
 	pakDir    string
 	err       error
-	mods      []Mod
 }
+
+type transitionToPackBuilderMsg struct{}
 
 func NewPackSetupModel() PackSetupModel {
 	ti := textinput.New()
@@ -36,9 +36,7 @@ func NewPackSetupModel() PackSetupModel {
 	ti.Width = 60
 
 	step := stepModsDir
-	if config.Current.ModsDir != "" && config.Current.PakDir != "" {
-		step = stepDiscovering
-	} else if config.Current.ModsDir != "" {
+	if config.Current.ModsDir != "" {
 		step = stepPakDir
 	}
 
@@ -51,9 +49,6 @@ func NewPackSetupModel() PackSetupModel {
 }
 
 func (m PackSetupModel) Init() tea.Cmd {
-	if m.step == stepDiscovering {
-		return m.discoverMods
-	}
 	return textinput.Blink
 }
 
@@ -63,29 +58,27 @@ func (m PackSetupModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlC, tea.KeyEsc:
+		case tea.KeyCtrlC:
+			return m, tea.Quit
+
+		case tea.KeyEsc:
 			return m, tea.Quit
 
 		case tea.KeyBackspace:
-			if msg.Type == tea.KeyBackspace && m.textInput.Value() == "" {
-				return m, func() tea.Msg { return BackMsg{} }
+			if m.textInput.Value() == "" {
+				return m, func() tea.Msg { return ui.BackMsg{} }
 			}
 
 		case tea.KeyEnter:
 			return m.handleEnter()
 		}
 
-	case modsDiscoveredMsg:
-		if msg.err != nil {
-			m.err = msg.err
-			return m, nil
-		}
-		m.mods = msg.mods
-		m.step = stepComplete
-		return NewPackBuilderModel(m.mods), nil
+	case ui.BackMsg:
+		return m, func() tea.Msg { return ui.BackMsg{} }
 
-	case BackMsg:
-		return m, func() tea.Msg { return BackMsg{} }
+	case transitionToPackBuilderMsg:
+		// Discover mods and quit to transition to pack builder
+		return m, tea.Quit
 	}
 
 	if m.step == stepModsDir || m.step == stepPakDir {
@@ -139,22 +132,17 @@ func (m PackSetupModel) handleEnter() (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		m.step = stepDiscovering
+		// Set to complete state to show success
+		m.step = stepComplete
 		m.err = nil
-		return m, m.discoverMods
+
+		// Transition to pack builder
+		return m, func() tea.Msg {
+			return transitionToPackBuilderMsg{}
+		}
 	}
 
 	return m, nil
-}
-
-type modsDiscoveredMsg struct {
-	mods []Mod
-	err  error
-}
-
-func (m PackSetupModel) discoverMods() tea.Msg {
-	mods, err := DiscoverMods()
-	return modsDiscoveredMsg{mods: mods, err: err}
 }
 
 func (m PackSetupModel) View() string {
@@ -174,20 +162,16 @@ func (m PackSetupModel) View() string {
 		s += ui.InfoStyle.Render("  Example: E:\\SteamLibrary\\steamapps\\common\\Grounded2\\Augusta\\Content\\Paks") + "\n\n"
 		s += m.textInput.View() + "\n\n"
 
-	case stepDiscovering:
-		s += ui.SuccessStyle.Render("✓ Mods directory: "+m.modsDir) + "\n"
-		s += ui.SuccessStyle.Render("✓ Paks directory: "+m.pakDir) + "\n\n"
-		s += ui.InfoStyle.Render("Discovering mods...") + "\n"
-
 	case stepComplete:
-		s += ui.SuccessStyle.Render(fmt.Sprintf("✓ Found %d mod(s)", len(m.mods))) + "\n"
+		s += ui.SuccessStyle.Render("✓ Configuration saved!") + "\n\n"
+		s += ui.InfoStyle.Render("Loading Pack Builder...") + "\n"
 	}
 
 	if m.err != nil {
 		s += "\n" + ui.ErrorStyle.Render(fmt.Sprintf("Error: %v", m.err)) + "\n"
 	}
 
-	s += "\n" + ui.InfoStyle.Render("Backspace: Go back • Ctrl+C/ESC: Quit")
+	s += "\n" + ui.InfoStyle.Render("Backspace: Go back • ESC: Quit")
 
 	return s
 }

@@ -22,7 +22,7 @@ type MainMenuModel struct {
 // Back Navigation
 type BackMsg struct{}
 
-// Creates a new main menu with available tools
+// Create main menu with available tools
 func NewMainMenuModel(tools []Tool) MainMenuModel {
 	return MainMenuModel{
 		tools:  tools,

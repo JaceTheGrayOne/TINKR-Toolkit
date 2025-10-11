@@ -3,7 +3,6 @@ package retoc
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -38,7 +37,6 @@ func NewPackBuilderModel(mods []Mod) PackBuilderModel {
 }
 
 func (m PackBuilderModel) Init() tea.Cmd {
-	fmt.Fprintf(os.Stderr, "DEBUG: PackBuilderModel.Init() called with %d mods\n", len(m.mods))
 	return nil
 }
 
@@ -47,13 +45,13 @@ func (m PackBuilderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		if m.building {
 			switch msg.String() {
-			case "ctrl+c", "esc":
+			case "ctrl+c":
 				if m.cancel != nil {
 					m.cancel()
 				}
 				return m, tea.Quit
 
-			case "backspace":
+			case "esc":
 				if m.cancel != nil {
 					m.cancel()
 				}
@@ -63,11 +61,14 @@ func (m PackBuilderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch msg.String() {
-		case "ctrl+c", "esc":
+		case "ctrl+c":
 			return m, tea.Quit
 
+		case "esc":
+			return m, func() tea.Msg { return ui.BackMsg{} }
+
 		case "backspace":
-			return m, func() tea.Msg { return BackMsg{} }
+			return m, func() tea.Msg { return ui.BackMsg{} }
 
 		case "up":
 			if m.cursor > 0 {
@@ -165,10 +166,8 @@ func (m PackBuilderModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// Renders the UI
+// Render UI
 func (m PackBuilderModel) View() string {
-	fmt.Fprintf(os.Stderr, "DEBUG: PackBuilderModel.View() called\n")
-
 	if m.building {
 		elapsed := time.Since(m.buildStart)
 		if elapsed > 500*time.Millisecond {
@@ -244,7 +243,7 @@ func (m PackBuilderModel) menuView() string {
 		s += "\n"
 	}
 
-	s += "\nSpace to select • Enter to build • Hotkeys: 0-9 • ESC: Quit"
+	s += "\nSpace to select • Enter to build • Hotkeys: 0-9 • Backspace: Back • ESC: Quit"
 
 	return s
 }
@@ -268,7 +267,7 @@ func (m PackBuilderModel) buildingView() string {
 		}
 	}
 
-	s += "\n\nPress Esc to cancel"
+	s += "\n\nPress ESC to cancel"
 
 	return s
 }

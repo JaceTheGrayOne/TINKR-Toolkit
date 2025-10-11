@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -45,7 +44,7 @@ func LoadOrCreate() (Config, error) {
 
 	configPath := filepath.Join(exeDir, "config.json")
 
-	// Try to load existing config
+	// Load existing config
 	data, err := os.ReadFile(configPath)
 	if err == nil {
 		var cfg Config
@@ -80,24 +79,14 @@ func LoadOrCreate() (Config, error) {
 func runSetup(exeDir string) (Config, error) {
 	retocDir := filepath.Join(exeDir, "retoc")
 
-	fmt.Println(titleStyle.Render("Setup"))
-	fmt.Println()
-	fmt.Println(infoStyle.Render("Initial configuration created."))
-	fmt.Println(infoStyle.Render("Tool-specific paths will be configured when needed."))
-	fmt.Println()
-
 	cfg := Config{
 		RetocDir: retocDir,
 	}
 
-	fmt.Println(successStyle.Render("Config created."))
-	fmt.Println()
-	time.Sleep(1 * time.Second)
-
 	return cfg, nil
 }
 
-// Prompt the user for the mods directory
+// Prompt for mods directory
 func PromptForModsDir() (string, error) {
 	fmt.Println(titleStyle.Render("Pack Setup"))
 	fmt.Println()
@@ -117,7 +106,7 @@ func PromptForModsDir() (string, error) {
 		return "", fmt.Errorf("directory is invalid: %w", err)
 	}
 
-	// Validate directory exists
+	// Validate directory
 	if _, err := os.Stat(modsDir); err != nil {
 		return "", fmt.Errorf("directory not found: %s", modsDir)
 	}
@@ -135,7 +124,7 @@ func PromptForModsDir() (string, error) {
 	return modsDir, nil
 }
 
-// Prompt the user for the pak directory
+// Prompt for pak directory
 func PromptForPakDir() (string, error) {
 	fmt.Println("UE Game \"Paks\" Directory:")
 	fmt.Println(infoStyle.Render("  Example: E:\\SteamLibrary\\steamapps\\common\\Grounded2\\Augusta\\Content\\Paks"))
@@ -165,7 +154,7 @@ func PromptForPakDir() (string, error) {
 	return pakDir, nil
 }
 
-// Prompt the user for the output directory
+// Prompt for output directory
 func PromptForOutputDir() (string, error) {
 	fmt.Println(titleStyle.Render("Unpack Setup"))
 	fmt.Println()

@@ -1,6 +1,5 @@
 # Binaries
-*.exe
-*.dll
+TINKR-Toolkit.exe
 *.so
 *.dylib
 

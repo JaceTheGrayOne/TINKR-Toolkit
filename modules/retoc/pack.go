@@ -17,7 +17,7 @@ import (
 	"github.com/JaceTheGrayOne/TINKR-Toolkit/modules/utils"
 )
 
-// Executes the retoc packing process for a single mod
+// Execute retoc packing process
 func BuildMod(ctx context.Context, log *strings.Builder, mod Mod) error {
 	outUtoc := filepath.Join(filepath.Dir(mod.Path), mod.Name+".utoc")
 
@@ -75,7 +75,7 @@ func BuildMod(ctx context.Context, log *strings.Builder, mod Mod) error {
 	return nil
 }
 
-// Builds all mods sequentially
+// Build all mods sequentially
 func BuildAllAsync(ctx context.Context, mods []Mod) tea.Cmd {
 	return func() tea.Msg {
 		var log strings.Builder
@@ -114,7 +114,7 @@ func BuildAllAsync(ctx context.Context, mods []Mod) tea.Cmd {
 	}
 }
 
-// Builds a single mod
+// Build a single mod
 func BuildOneAsync(ctx context.Context, mod Mod) tea.Cmd {
 	return func() tea.Msg {
 		var log strings.Builder
@@ -143,7 +143,7 @@ func BuildOneAsync(ctx context.Context, mod Mod) tea.Cmd {
 	}
 }
 
-// Builds multiple mods in parallel
+// Build multiple mods in parallel
 func BuildSelectedParallelAsync(ctx context.Context, selectedMods []Mod) tea.Cmd {
 	return func() tea.Msg {
 		var wg sync.WaitGroup

@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	// Load or create configuration
+	// Load or create config
 	var err error
 	config.Current, err = config.LoadOrCreate()
 	if err != nil {
@@ -47,7 +47,7 @@ func main() {
 		// },
 	}
 
-	// Launch the main menu
+	// Launch main menu
 	mainMenu := ui.NewMainMenuModel(tools)
 	currentModel := tea.Model(mainMenu)
 
@@ -62,16 +62,43 @@ func main() {
 			os.Exit(1)
 		}
 
+		// Handle navigation between models
 		switch finalModel.(type) {
 		case retoc.RetocMenuModel:
+			// Return from Retoc menu to main menu
 			currentModel = mainMenu
 			continue
 
 		case retoc.PackBuilderModel:
+			// Return from Pack Builder to Retoc menu
 			currentModel = retoc.NewRetocMenuModel()
 			continue
 
+		case retoc.PackSetupModel:
+			// Check if setup complete
+			if config.Current.ModsDir != "" && config.Current.PakDir != "" {
+				// Discover mods and transition to pack builder
+				mods, err := retoc.DiscoverMods()
+				if err == nil && len(mods) > 0 {
+					currentModel = retoc.NewPackBuilderModel(mods)
+					continue
+				}
+			}
+			// Setup cancelled or failed - return to Retoc menu
+			currentModel = retoc.NewRetocMenuModel()
+			continue
+
+		case retoc.UnpackSetupModel:
+			// Return from Unpack Setup to Retoc menu
+			currentModel = retoc.NewRetocMenuModel()
+			continue
+
+		case ui.MainMenuModel:
+			// If BackMsg to main menu, quit
+			return
+
 		default:
+			// Any other case, quit
 			return
 		}
 	}

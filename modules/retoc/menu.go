@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/JaceTheGrayOne/TINKR-Toolkit/modules/config"
 	"github.com/JaceTheGrayOne/TINKR-Toolkit/modules/ui"
 )
 
@@ -26,6 +27,14 @@ func NewRetocMenuModel() RetocMenuModel {
 			Name:        "Pack Legacy Assets (Legacy → Zen)",
 			Description: "Build mods from modified UAsset/UEXP files into Zen pak format",
 			Handler: func() tea.Model {
+				// If paths are already configured, go directly to pack builder
+				if config.Current.ModsDir != "" && config.Current.PakDir != "" {
+					mods, err := DiscoverMods()
+					if err == nil && len(mods) > 0 {
+						return NewPackBuilderModel(mods)
+					}
+					// If error, fall through to setup to reconfigure
+				}
 				return NewPackSetupModel()
 			},
 		},
@@ -33,8 +42,7 @@ func NewRetocMenuModel() RetocMenuModel {
 			Name:        "Unpack Game Files (Zen → Legacy)",
 			Description: "Extract game assets from Zen pak format to Legacy format",
 			Handler: func() tea.Model {
-				// TODO: Implement unpack setup
-				return NewRetocMenuModel()
+				return NewUnpackSetupModel()
 			},
 		},
 	}
@@ -54,7 +62,10 @@ func (m RetocMenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "esc":
+		case "ctrl+c":
+			return m, tea.Quit
+
+		case "esc":
 			return m, tea.Quit
 
 		case "backspace":
@@ -91,7 +102,7 @@ func (m RetocMenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// Renders the workflow selector
+// Render workflow selector
 func (m RetocMenuModel) View() string {
 	s := ui.TitleStyle.Render("Retoc - Zen Asset Packer/Unpacker") + "\n\n"
 	s += ui.NormalStyle.Render("Select a workflow:") + "\n\n"

@@ -6,8 +6,7 @@ import (
 	"path/filepath"
 )
 
-// CopyFile performs an atomic file copy operation.
-// Creates a temporary file, copies content, then renames to destination.
+// Atomic file copy operation.
 func CopyFile(src, dst string) error {
 	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 		return err
